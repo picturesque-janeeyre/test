@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우리 집 장보기</title>
+<style>
+  :root {
+    --paper: #f4ead5;
+    --paper-deep: #ebdcbc;
+    --card: #fbf5e6;
+    --ink: #2e2118;
+    --ink-soft: #6b5846;
+    --burgundy: #6e1f2a;
+    --burgundy-deep: #4f141d;
+    --green: #2f4a3a;
+    --gold: #b08d3c;
+    --gold-light: #d8bd72;
+    --line: #cdb88a;
+    --serif: "Nanum Myeongjo", "Batang", "바탕", "AppleMyungjo", "Noto Serif KR", Georgia, "Times New Roman", serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse at top, rgba(255,255,255,.55), transparent 60%),
+      radial-gradient(ellipse at bottom, rgba(110,31,42,.08), transparent 70%),
+      var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.55;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 32px 16px 64px; }
+
+  /* ---------- 머리말 ---------- */
+  header { text-align: center; margin-bottom: 28px; }
+  .crest { color: var(--gold); font-size: 22px; letter-spacing: .6em; margin-left: .6em; }
+  h1 {
+    margin: 6px 0 4px;
+    font-size: clamp(30px, 6vw, 46px);
+    font-weight: 800;
+    color: var(--burgundy);
+    letter-spacing: .08em;
+    text-shadow: 0 1px 0 rgba(255,255,255,.7);
+  }
+  .sub { color: var(--ink-soft); font-style: italic; letter-spacing: .05em; }
+  .flourish {
+    display: flex; align-items: center; gap: 12px; justify-content: center;
+    margin: 14px auto 0; max-width: 420px; color: var(--gold);
+  }
+  .flourish::before, .flourish::after {
+    content: ""; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .tally {
+    display: inline-block; margin-top: 14px; padding: 4px 18px;
+    border: 1px solid var(--gold); border-radius: 999px;
+    color: var(--green); background: rgba(251,245,230,.7); font-weight: 700;
+  }
+
+  /* ---------- 공통 카드 ---------- */
+  .ornate {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--gold);
+    outline: 1px solid var(--gold);
+    outline-offset: -6px;
+    border-radius: 4px;
+    box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 8px 22px rgba(79,20,29,.12);
+    padding: 22px 22px 18px;
+  }
+  .ornate::before, .ornate::after {
+    content: "❦"; position: absolute; color: var(--gold); font-size: 15px; line-height: 1;
+  }
+  .ornate::before { top: 9px; left: 11px; transform: rotate(-90deg); }
+  .ornate::after  { bottom: 9px; right: 11px; transform: rotate(90deg); }
+
+  /* ---------- 추가 양식 ---------- */
+  .add { margin-bottom: 28px; }
+  .add h2, .store h2 {
+    margin: 0 0 12px; font-size: 19px; color: var(--burgundy);
+    letter-spacing: .06em; text-align: center;
+  }
+  .form-grid {
+    display: grid; gap: 10px;
+    grid-template-columns: 2fr 1fr 2fr 1.3fr auto;
+  }
+  label.field { display: flex; flex-direction: column; font-size: 13px; color: var(--ink-soft); gap: 3px; }
+  input[type=text], select {
+    font: inherit; font-size: 15px; color: var(--ink);
+    background: #fffdf6; border: 1px solid var(--line); border-radius: 3px;
+    padding: 9px 10px; min-width: 0; width: 100%;
+  }
+  input[type=text]:focus, select:focus {
+    outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(176,141,60,.22);
+  }
+  .btn {
+    font: inherit; font-weight: 700; letter-spacing: .05em; cursor: pointer;
+    border-radius: 3px; padding: 9px 18px; border: 1px solid var(--burgundy-deep);
+    background: linear-gradient(var(--burgundy), var(--burgundy-deep));
+    color: #f6e7c1; box-shadow: 0 0 0 1px var(--gold-light) inset;
+  }
+  .btn:hover { filter: brightness(1.12); }
+  .btn:active { transform: translateY(1px); }
+  .btn.ghost {
+    background: transparent; color: var(--burgundy); border-color: var(--gold); box-shadow: none;
+  }
+  .btn.ghost:hover { background: rgba(176,141,60,.12); filter: none; }
+  .form-grid .btn { align-self: end; height: 42px; }
+
+  /* ---------- 가게 칸 ---------- */
+  .stores {
+    display: grid; gap: 22px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    align-items: start;
+  }
+  .store-head {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding-bottom: 10px; margin-bottom: 6px; border-bottom: 1px solid var(--line);
+  }
+  .store h2 { margin: 0; }
+  .store h2 input { text-align: center; font-weight: 700; color: var(--burgundy); font-size: 18px; padding: 4px 8px; }
+  .count {
+    font-size: 12px; color: var(--green); border: 1px solid var(--gold);
+    border-radius: 999px; padding: 0 9px; white-space: nowrap;
+  }
+  .store-tools { display: flex; justify-content: center; gap: 4px; margin-top: 10px; }
+
+  .icon-btn {
+    font: inherit; font-size: 13px; cursor: pointer; background: none; border: none;
+    color: var(--ink-soft); padding: 4px 6px; border-radius: 3px;
+  }
+  .icon-btn:hover { color: var(--burgundy); background: rgba(176,141,60,.14); }
+
+  ul.items { list-style: none; margin: 0; padding: 0; }
+  li.item {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start;
+    padding: 11px 2px; border-bottom: 1px dashed var(--line);
+  }
+  li.item:last-child { border-bottom: none; }
+  .empty { text-align: center; color: var(--ink-soft); font-style: italic; padding: 18px 0 6px; font-size: 14px; }
+
+  /* 금색 체크박스 */
+  .check {
+    appearance: none; -webkit-appearance: none; margin: 2px 0 0;
+    width: 24px; height: 24px; cursor: pointer; flex: none;
+    border: 1.5px solid var(--gold); border-radius: 3px;
+    background: #fffdf6; box-shadow: 0 0 0 2px var(--card), 0 0 0 3px var(--gold-light);
+    display: grid; place-content: center; transition: background .15s;
+  }
+  .check::after {
+    content: "✓"; font-size: 17px; font-weight: 700; color: #f6e7c1;
+    transform: scale(0); transition: transform .15s;
+  }
+  .check:checked { background: var(--green); border-color: var(--green); }
+  .check:checked::after { transform: scale(1); }
+  .check:focus-visible { outline: 2px solid var(--burgundy); outline-offset: 3px; }
+
+  .body { min-width: 0; cursor: pointer; }
+  .name { font-weight: 700; font-size: 16.5px; word-break: break-word; }
+  .qty { color: var(--burgundy); font-weight: 400; margin-left: 6px; font-size: 14.5px; }
+  .memo { color: var(--ink-soft); font-size: 13.5px; font-style: italic; word-break: break-word; }
+  .memo::before { content: "— "; color: var(--gold); }
+  li.done .name, li.done .qty, li.done .memo {
+    text-decoration: line-through; text-decoration-color: var(--burgundy); opacity: .5;
+  }
+  .actions { display: flex; gap: 2px; }
+
+  .edit-grid { display: grid; gap: 6px; grid-template-columns: 1fr 1fr; }
+  .edit-grid .full { grid-column: 1 / -1; }
+  .edit-grid input, .edit-grid select { padding: 6px 8px; font-size: 14px; }
+  .edit-row { display: flex; gap: 6px; justify-content: flex-end; }
+  .edit-row .btn { padding: 5px 12px; font-size: 13px; }
+
+  /* ---------- 아래쪽 ---------- */
+  .footer-bar {
+    display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; align-items: center;
+    margin-top: 34px;
+  }
+  .btn.finish { font-size: 17px; padding: 13px 34px; }
+  .note { text-align: center; color: var(--ink-soft); font-size: 13px; margin-top: 14px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
+    background: var(--green); color: #f6e7c1; border: 1px solid var(--gold);
+    padding: 10px 20px; border-radius: 3px; opacity: 0; pointer-events: none;
+    transition: opacity .25s, transform .25s; max-width: calc(100% - 32px); text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 760px) {
+    .form-grid { grid-template-columns: 1fr 1fr; }
+    .form-grid .wide { grid-column: 1 / -1; }
+    .form-grid .btn { grid-column: 1 / -1; }
+    .stores { grid-template-columns: 1fr; }
+    .wrap { padding-top: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="crest">✦ ✦ ✦</div>
+    <h1>우리 집 장보기</h1>
+    <div class="sub" id="today"></div>
+    <div class="flourish">❧</div>
+    <div class="tally" id="tally"></div>
+  </header>
+
+  <section class="add ornate">
+    <h2>새 물건 적기</h2>
+    <form id="addForm" class="form-grid" autocomplete="off">
+      <label class="field wide">이름
+        <input type="text" id="fName" placeholder="예: 계란" required maxlength="40">
+      </label>
+      <label class="field">수량
+        <input type="text" id="fQty" placeholder="예: 2판" maxlength="20">
+      </label>
+      <label class="field wide">메모
+        <input type="text" id="fMemo" placeholder="예: 무항생제로" maxlength="60">
+      </label>
+      <label class="field">가게
+        <select id="fStore"></select>
+      </label>
+      <button class="btn" type="submit">적기</button>
+    </form>
+  </section>
+
+  <main class="stores" id="stores"></main>
+
+  <div class="footer-bar">
+    <button class="btn ghost" id="addStore" type="button">＋ 가게 추가</button>
+    <button class="btn finish" id="finish" type="button">🛒 장보기 끝</button>
+  </div>
+  <p class="note">「장보기 끝」을 누르면 산 물건만 지워지고, 못 산 물건은 다음 장보기에 그대로 남아요.<br>목록은 이 브라우저 안에만 저장됩니다.</p>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var KEY = 'woorijib-jangbogi-v1';
+  var state;
+
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  function defaults() {
+    return {
+      stores: [
+        { id: uid(), name: '마트' },
+        { id: uid(), name: '시장' },
+        { id: uid(), name: '온라인' }
+      ],
+      items: []
+    };
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var s = JSON.parse(raw);
+        if (s && Array.isArray(s.stores) && Array.isArray(s.items)) return s;
+      }
+    } catch (e) {}
+    return defaults();
+  }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {
+      toast('저장하지 못했어요. 브라우저 저장소가 막혀 있는지 확인해 주세요.');
+    }
+  }
+
+  var toastTimer;
+  function toast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2400);
+  }
+
+  function el(tag, props, children) {
+    var n = document.createElement(tag);
+    if (props) for (var k in props) {
+      if (k === 'class') n.className = props[k];
+      else if (k === 'text') n.textContent = props[k];
+      else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), props[k]);
+      else n.setAttribute(k, props[k]);
+    }
+    (children || []).forEach(function (c) { if (c) n.appendChild(c); });
+    return n;
+  }
+
+  var editingItem = null;
+  var editingStore = null;
+
+  function storeOptions(select, selectedId) {
+    select.innerHTML = '';
+    state.stores.forEach(function (s) {
+      var o = el('option', { value: s.id, text: s.name });
+      if (s.id === selectedId) o.selected = true;
+      select.appendChild(o);
+    });
+  }
+
+  function render() {
+    // 날짜·남은 개수
+    var d = new Date();
+    var days = ['일', '월', '화', '수', '목', '금', '토'];
+    document.getElementById('today').textContent =
+      d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + days[d.getDay()] + '요일';
+    var left = state.items.filter(function (i) { return !i.done; }).length;
+    var bought = state.items.length - left;
+    document.getElementById('tally').textContent =
+      state.items.length === 0 ? '아직 적힌 물건이 없어요' :
+      '남은 물건 ' + left + '개' + (bought ? ' · 산 물건 ' + bought + '개' : '');
+
+    // 가게 선택 목록
+    var fStore = document.getElementById('fStore');
+    var prev = fStore.value;
+    storeOptions(fStore, prev);
+    document.querySelector('#addForm .btn').disabled = state.stores.length === 0;
+
+    // 가게 칸
+    var wrap = document.getElementById('stores');
+    wrap.innerHTML = '';
+    if (state.stores.length === 0) {
+      wrap.appendChild(el('p', { class: 'empty', text: '가게가 없어요. 아래 「가게 추가」로 만들어 주세요.' }));
+    }
+    state.stores.forEach(function (store) {
+      var items = state.items.filter(function (i) { return i.storeId === store.id; });
+      var leftHere = items.filter(function (i) { return !i.done; }).length;
+
+      var title;
+      if (editingStore === store.id) {
+        var inp = el('input', { type: 'text', value: store.name, maxlength: '20', 'aria-label': '가게 이름' });
+        var commit = function () {
+          var v = inp.value.trim();
+          if (v) store.name = v;
+          editingStore = null; save(); render();
+        };
+        inp.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') commit();
+          if (e.key === 'Escape') { editingStore = null; render(); }
+        });
+        inp.addEventListener('blur', commit);
+        title = el('h2', null, [inp]);
+        setTimeout(function () { inp.focus(); inp.select(); }, 0);
+      } else {
+        title = el('h2', { text: store.name });
+      }
+
+      var list = el('ul', { class: 'items' });
+      items.forEach(function (item) { list.appendChild(renderItem(item)); });
+
+      var card = el('section', { class: 'store ornate' }, [
+        el('div', { class: 'store-head' }, [
+          title,
+          el('span', { class: 'count', text: items.length ? '남은 ' + leftHere + ' / ' + items.length : '비어 있음' })
+        ]),
+        items.length ? list : el('p', { class: 'empty', text: '적힌 물건이 없어요' }),
+        el('div', { class: 'store-tools' }, [
+          el('button', { class: 'icon-btn', type: 'button', text: '✎ 이름 바꾸기',
+            onclick: function () { editingStore = store.id; render(); } }),
+          el('button', { class: 'icon-btn', type: 'button', text: '✕ 가게 지우기',
+            onclick: function () { removeStore(store, items.length); } })
+        ])
+      ]);
+      wrap.appendChild(card);
+    });
+  }
+
+  function renderItem(item) {
+    if (editingItem === item.id) return renderEditor(item);
+
+    var cb = el('input', { type: 'checkbox', class: 'check', 'aria-label': item.name + ' 샀어요' });
+    cb.checked = !!item.done;
+    cb.addEventListener('change', function () { item.done = cb.checked; save(); render(); });
+
+    var nameLine = el('div', { class: 'name', text: item.name }, [
+      item.qty ? el('span', { class: 'qty', text: '· ' + item.qty }) : null
+    ]);
+    var body = el('div', { class: 'body', onclick: function () { item.done = !item.done; save(); render(); } }, [
+      nameLine,
+      item.memo ? el('div', { class: 'memo', text: item.memo }) : null
+    ]);
+
+    var actions = el('div', { class: 'actions' }, [
+      el('button', { class: 'icon-btn', type: 'button', title: '고치기', 'aria-label': item.name + ' 고치기', text: '✎',
+        onclick: function () { editingItem = item.id; render(); } }),
+      el('button', { class: 'icon-btn', type: 'button', title: '지우기', 'aria-label': item.name + ' 지우기', text: '✕',
+        onclick: function () {
+          state.items = state.items.filter(function (i) { return i.id !== item.id; });
+          save(); render(); toast('「' + item.name + '」을(를) 지웠어요');
+        } })
+    ]);
+
+    return el('li', { class: 'item' + (item.done ? ' done' : '') }, [cb, body, actions]);
+  }
+
+  function renderEditor(item) {
+    var n = el('input', { type: 'text', value: item.name, maxlength: '40', 'aria-label': '이름', class: 'full' });
+    var q = el('input', { type: 'text', value: item.qty || '', maxlength: '20', placeholder: '수량', 'aria-label': '수량' });
+    var s = el('select', { 'aria-label': '가게' });
+    storeOptions(s, item.storeId);
+    var m = el('input', { type: 'text', value: item.memo || '', maxlength: '60', placeholder: '메모', 'aria-label': '메모', class: 'full' });
+
+    function commit() {
+      var name = n.value.trim();
+      if (!name) { n.focus(); return; }
+      item.name = name; item.qty = q.value.trim(); item.memo = m.value.trim(); item.storeId = s.value;
+      editingItem = null; save(); render();
+    }
+    [n, q, m].forEach(function (x) {
+      x.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') commit();
+        if (e.key === 'Escape') { editingItem = null; render(); }
+      });
+    });
+    setTimeout(function () { n.focus(); }, 0);
+
+    var box = el('div', { class: 'edit-grid' }, [n, q, s, m,
+      el('div', { class: 'edit-row full' }, [
+        el('button', { class: 'btn ghost', type: 'button', text: '취소', onclick: function () { editingItem = null; render(); } }),
+        el('button', { class: 'btn', type: 'button', text: '저장', onclick: commit })
+      ])
+    ]);
+    var li = el('li', { class: 'item' }, [box]);
+    li.style.gridTemplateColumns = '1fr';
+    return li;
+  }
+
+  function removeStore(store, count) {
+    var msg = count
+      ? '「' + store.name + '」 가게와 그 안의 물건 ' + count + '개를 모두 지울까요?'
+      : '「' + store.name + '」 가게를 지울까요?';
+    if (!confirm(msg)) return;
+    state.stores = state.stores.filter(function (s) { return s.id !== store.id; });
+    state.items = state.items.filter(function (i) { return i.storeId !== store.id; });
+    save(); render();
+  }
+
+  document.getElementById('addForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var nameEl = document.getElementById('fName');
+    var name = nameEl.value.trim();
+    var storeId = document.getElementById('fStore').value;
+    if (!name || !storeId) return;
+    state.items.push({
+      id: uid(), storeId: storeId, name: name,
+      qty: document.getElementById('fQty').value.trim(),
+      memo: document.getElementById('fMemo').value.trim(),
+      done: false
+    });
+    save(); render();
+    nameEl.value = ''; document.getElementById('fQty').value = ''; document.getElementById('fMemo').value = '';
+    nameEl.focus();
+  });
+
+  document.getElementById('addStore').addEventListener('click', function () {
+    var s = { id: uid(), name: '새 가게' };
+    state.stores.push(s);
+    editingStore = s.id;
+    save(); render();
+  });
+
+  document.getElementById('finish').addEventListener('click', function () {
+    var bought = state.items.filter(function (i) { return i.done; }).length;
+    var left = state.items.length - bought;
+    if (!bought) { toast('아직 체크한 물건이 없어요'); return; }
+    if (!confirm('산 물건 ' + bought + '개를 목록에서 지울까요?\n못 산 물건 ' + left + '개는 다음 장보기에 남아요.')) return;
+    state.items = state.items.filter(function (i) { return !i.done; });
+    save(); render();
+    toast('수고하셨어요! 못 산 물건 ' + left + '개는 그대로 남겨 뒀어요');
+  });
+
+  // 다른 탭에서 바뀌면 따라가기
+  window.addEventListener('storage', function (e) {
+    if (e.key === KEY) { state = load(); render(); }
+  });
+
+  state = load();
+  save();
+  render();
+})();
+</script>
+</body>
+</html>
